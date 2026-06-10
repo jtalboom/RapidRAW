@@ -1146,6 +1146,8 @@
       "btnStart": "시작",
       "cancel": "취소",
       "close": "닫기",
+      "completedIn": "노이즈 제거 완료: {{time}}초",
+      "elapsedTime": "경과 시간: {{time}}초",
       "denoised": "노이즈 제거됨",
       "denoisingProgress": "노이즈 제거 진행 중",
       "description": "AI 기반 또는 기존 방식의 노이즈 제거로 이미지의 노이즈를 제거합니다.",

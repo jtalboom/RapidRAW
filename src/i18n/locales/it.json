@@ -1140,6 +1140,8 @@
     },
     "denoise": {
       "batchProgressText": "Riduzione rumore su {{current}} di {{total}}...",
+      "completedIn": "Riduzione rumore completata in {{time}}s",
+      "elapsedTime": "Tempo trascorso: {{time}}s",
       "btnBatchDenoise": "Riduci Rumore in Blocco e Salva",
       "btnRetry": "Riprova",
       "btnSave": "Salva",

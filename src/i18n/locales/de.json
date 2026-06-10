@@ -1147,6 +1147,7 @@
       "cancel": "Abbrechen",
       "close": "Schließen",
       "completedIn": "Rauschminderung abgeschlossen in {{time}}s",
+      "elapsedTime": "Vergangene Zeit: {{time}}s",
       "denoised": "Entrauscht",
       "denoisingProgress": "Entrauschen in Arbeit",
       "description": "Entfernen Sie Rauschen aus Ihrem Bild mithilfe von KI-gestütztem oder traditionellem Entrauschen.",

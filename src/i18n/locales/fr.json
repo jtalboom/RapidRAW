@@ -1140,6 +1140,8 @@
     },
     "denoise": {
       "batchProgressText": "Débruitage {{current}} sur {{total}}...",
+      "completedIn": "Débruitage terminé en {{time}}s",
+      "elapsedTime": "Temps écoulé : {{time}}s",
       "btnBatchDenoise": "Débruiter par lot & Enregistrer",
       "btnRetry": "Réessayer",
       "btnSave": "Enregistrer",

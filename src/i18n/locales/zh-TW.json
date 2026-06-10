@@ -1146,6 +1146,8 @@
       "btnStart": "開始",
       "cancel": "取消",
       "close": "關閉",
+      "completedIn": "降噪完成，耗時 {{time}} 秒",
+      "elapsedTime": "已用時間：{{time}} 秒",
       "denoised": "已降噪",
       "denoisingProgress": "降噪進行中",
       "description": "使用 AI 驅動或傳統降噪技術去除影像中的噪聲。",
