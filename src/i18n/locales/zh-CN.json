@@ -1130,6 +1130,8 @@
     },
     "denoise": {
       "batchProgressText": "降噪中 {{current}} / {{total}}...",
+      "completedIn": "降噪完成，耗时 {{time}} 秒",
+      "elapsedTime": "已用时间：{{time}} 秒",
       "btnBatchDenoise": "批量降噪并保存",
       "btnRetry": "重试",
       "btnSave": "保存",

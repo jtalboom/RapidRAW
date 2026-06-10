@@ -1129,6 +1129,8 @@
     },
     "denoise": {
       "batchProgressText": "ノイズ低減を実行中 ({{current}}/{{total}})...",
+      "completedIn": "ノイズ低減が {{time}}秒 で完了しました",
+      "elapsedTime": "経過時間: {{time}}秒",
       "btnBatchDenoise": "一括ノイズ低減して保存",
       "btnRetry": "再試行",
       "btnSave": "保存",

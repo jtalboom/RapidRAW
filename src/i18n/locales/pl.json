@@ -1178,6 +1178,8 @@
     },
     "denoise": {
       "batchProgressText": "Odszumianie {{current}} z {{total}}...",
+      "completedIn": "Odszumianie zakończone w {{time}}s",
+      "elapsedTime": "Czas, który upłynął: {{time}}s",
       "btnBatchDenoise": "Zbiorcze Odszumianie i Zapis",
       "btnRetry": "Spróbuj ponownie",
       "btnSave": "Zapisz",

@@ -1130,6 +1130,8 @@
     },
     "denoise": {
       "batchProgressText": "Reduzindo ruído {{current}} de {{total}}...",
+      "completedIn": "Redução de ruído concluída em {{time}}s",
+      "elapsedTime": "Tempo decorrido: {{time}}s",
       "btnBatchDenoise": "Redução de Ruído em Lote e Salvar",
       "btnRetry": "Tentar Novamente",
       "btnSave": "Salvar",

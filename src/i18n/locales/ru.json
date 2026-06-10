@@ -1129,6 +1129,8 @@
     },
     "denoise": {
       "batchProgressText": "Шумоподавление: {{current}} из {{total}}...",
+      "completedIn": "Шумоподавление выполнено за {{time}} сек",
+      "elapsedTime": "Прошедшее время: {{time}} сек",
       "btnBatchDenoise": "Пакетное шумоподавление и сохранение",
       "btnRetry": "Повторить",
       "btnSave": "Сохранить",
