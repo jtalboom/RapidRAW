@@ -1,8 +1,9 @@
 use std::fs;
-use std::io::{Cursor, Read};
+use std::io::Read;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
+use crate::download_utils::download_file;
 use anyhow::Result;
 use image::imageops::{self, FilterType};
 use image::{
@@ -170,14 +171,6 @@ fn get_models_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf> {
     Ok(models_dir)
 }
 
-async fn download_model(url: &str, dest: &Path) -> Result<()> {
-    let response = reqwest::get(url).await?;
-    let mut file = fs::File::create(dest)?;
-    let mut content = Cursor::new(response.bytes().await?);
-    std::io::copy(&mut content, &mut file)?;
-    Ok(())
-}
-
 fn verify_sha256(path: &Path, expected_hash: &str) -> Result<bool> {
     if !path.exists() {
         return Ok(false);
@@ -199,6 +192,7 @@ fn verify_sha256(path: &Path, expected_hash: &str) -> Result<bool> {
 
 async fn download_and_verify_model(
     app_handle: &tauri::AppHandle,
+    client: &reqwest::Client,
     models_dir: &Path,
     filename: &str,
     url: &str,
@@ -210,19 +204,35 @@ async fn download_and_verify_model(
 
     if !is_valid {
         if dest_path.exists() {
-            println!("Model {} has incorrect hash. Re-downloading.", model_name);
+            log::warn!("Model {} has incorrect hash. Re-downloading.", model_name);
             fs::remove_file(&dest_path)?;
         }
         let _ = app_handle.emit("ai-model-download-start", model_name);
-        download_model(url, &dest_path).await?;
+        let result = download_file(client, url, &dest_path, app_handle, model_name).await;
         let _ = app_handle.emit("ai-model-download-finish", model_name);
+        
+        if let Err(e) = result {
+            let err_msg = format!("Failed to download {}: {}", model_name, e);
+            log::error!("{}", err_msg);
+            let _ = app_handle.emit("ai-model-download-error", &err_msg);
+            return Err(e);
+        }
 
         if !verify_sha256(&dest_path, expected_hash)? {
-            return Err(anyhow::anyhow!(
-                "Failed to verify model {} after download. Hash mismatch.",
-                model_name
-            ));
+            if dest_path.exists() {
+                let _ = fs::remove_file(&dest_path);
+            }
+            let err_msg = format!("Failed to verify model {} after download. Hash mismatch.", model_name);
+            log::error!("{}", err_msg);
+            let _ = app_handle.emit("ai-model-download-error", &err_msg);
+            return Err(anyhow::anyhow!(err_msg));
         }
+        log::info!("Model {} verified successfully after download.", model_name);
+    } else {
+        log::info!(
+            "Model {} already exists and verified successfully.",
+            model_name
+        );
     }
     Ok(())
 }
@@ -254,8 +264,14 @@ pub async fn get_or_init_ai_models(
 
     let models_dir = get_models_dir(app_handle)?;
 
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(300))
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .build()?;
+
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         ENCODER_FILENAME,
         ENCODER_URL,
@@ -265,6 +281,7 @@ pub async fn get_or_init_ai_models(
     .await?;
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         DECODER_FILENAME,
         DECODER_URL,
@@ -274,6 +291,7 @@ pub async fn get_or_init_ai_models(
     .await?;
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         U2NETP_FILENAME,
         U2NETP_URL,
@@ -283,6 +301,7 @@ pub async fn get_or_init_ai_models(
     .await?;
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         SKYSEG_FILENAME,
         SKYSEG_URL,
@@ -292,6 +311,7 @@ pub async fn get_or_init_ai_models(
     .await?;
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         DEPTH_FILENAME,
         DEPTH_URL,
@@ -367,8 +387,15 @@ pub async fn get_or_init_denoise_model(
     }
 
     let models_dir = get_models_dir(app_handle)?;
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(300))
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .build()?;
+
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         DENOISE_FILENAME,
         DENOISE_URL,
@@ -428,8 +455,14 @@ pub async fn get_or_init_clip_models(
 
     let models_dir = get_models_dir(app_handle)?;
 
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(300))
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .build()?;
+
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         CLIP_MODEL_FILENAME,
         CLIP_MODEL_URL,
@@ -441,8 +474,15 @@ pub async fn get_or_init_clip_models(
     let clip_tokenizer_path = models_dir.join(CLIP_TOKENIZER_FILENAME);
     if !clip_tokenizer_path.exists() {
         let _ = app_handle.emit("ai-model-download-start", "CLIP Tokenizer");
-        download_model(CLIP_TOKENIZER_URL, &clip_tokenizer_path).await?;
+        let result = download_file(&client, CLIP_TOKENIZER_URL, &clip_tokenizer_path, app_handle, "CLIP Tokenizer").await;
         let _ = app_handle.emit("ai-model-download-finish", "CLIP Tokenizer");
+        
+        if let Err(e) = result {
+            let err_msg = format!("Failed to download CLIP Tokenizer: {}", e);
+            log::error!("{}", err_msg);
+            let _ = app_handle.emit("ai-model-download-error", &err_msg);
+            return Err(e);
+        }
     }
 
     let _ = ort::init().with_name("AI-Tagging").commit();
@@ -498,8 +538,15 @@ pub async fn get_or_init_lama_model(
     }
 
     let models_dir = get_models_dir(app_handle)?;
+
+    let client = reqwest::Client::builder()
+        .timeout(std::time::Duration::from_secs(300))
+        .connect_timeout(std::time::Duration::from_secs(15))
+        .build()?;
+
     download_and_verify_model(
         app_handle,
+        &client,
         &models_dir,
         LAMA_FILENAME,
         LAMA_URL,
